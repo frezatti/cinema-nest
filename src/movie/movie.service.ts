@@ -1,26 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Movie } from 'generated/prisma';
 
 @Injectable()
 export class MovieService {
-  create(createMovieDto: CreateMovieDto) {
-    return 'This action adds a new movie';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createMovieDto: CreateMovieDto): Promise<Movie> {
+    return await this.prisma.movie.create({
+      data: createMovieDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all movie`;
+  async findAll(): Promise<Movie[]> {
+    return await this.prisma.movie.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} movie`;
+  async findOne(id: number): Promise<Movie> {
+    const movie = await this.prisma.movie.findUnique({
+      where: { id },
+    });
+
+    if (!movie) {
+      throw new NotFoundException('Movie not found 404');
+    }
+
+    return movie;
   }
 
-  update(id: number, updateMovieDto: UpdateMovieDto) {
-    return `This action updates a #${id} movie`;
+  async update(id: number, updateMovieDto: UpdateMovieDto): Promise<Movie> {
+    await this.findOne(id);
+    return this.prisma.movie.update({
+      where: { id },
+      data: updateMovieDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} movie`;
+  async remove(id: number): Promise<Movie> {
+    await this.findOne(id);
+    return await this.prisma.movie.delete({
+      where: { id },
+    });
   }
 }
