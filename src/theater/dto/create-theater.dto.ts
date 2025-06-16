@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsInt, IsPositive } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, IsPositive, IsIn } from 'class-validator';
 
 export class CreateTheaterDto {
   @IsString()
@@ -11,5 +11,6 @@ export class CreateTheaterDto {
   capacity: number;
 
   @IsString()
+  @IsIn(['2D', '3D', 'IMAX'])
   type: string;
 }
